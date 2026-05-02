@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agentic AI — Powered by Gemini</title>
+  <meta name="description" content="An autonomous AI agent that plans, searches the web, runs code, and solves complex tasks step by step using Google Gemini." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@400;700;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- Animated grid background -->
+  <div class="bg-grid" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-1" aria-hidden="true"></div>
+  <div class="bg-glow bg-glow-2" aria-hidden="true"></div>
+
+  <div class="layout">
+
+    <!-- ─── SIDEBAR ─── -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-logo" id="sidebar-logo">
+        <span class="logo-mark">⬡</span>
+        <span class="logo-name">Agentic<span class="logo-accent">AI</span></span>
+      </div>
+
+      <div class="sidebar-section" id="sidebar-tools-section">
+        <p class="sidebar-label">Available Tools</p>
+        <ul class="tool-list" id="tool-list" role="list">
+          <li class="tool-item" id="tool-item-web-search" data-tool="web_search">
+            <span class="tool-icon">🌐</span>
+            <div>
+              <span class="tool-name">Web Search</span>
+              <span class="tool-desc">DuckDuckGo real-time search</span>
+            </div>
+          </li>
+          <li class="tool-item" id="tool-item-calculator" data-tool="calculator">
+            <span class="tool-icon">🧮</span>
+            <div>
+              <span class="tool-name">Calculator</span>
+              <span class="tool-desc">Safe math expression evaluator</span>
+            </div>
+          </li>
+          <li class="tool-item" id="tool-item-wikipedia" data-tool="wikipedia_search">
+            <span class="tool-icon">📖</span>
+            <div>
+              <span class="tool-name">Wikipedia</span>
+              <span class="tool-desc">Factual knowledge lookup</span>
+            </div>
+          </li>
+          <li class="tool-item" id="tool-item-datetime" data-tool="get_datetime">
+            <span class="tool-icon">🕐</span>
+            <div>
+              <span class="tool-name">Date & Time</span>
+              <span class="tool-desc">Current datetime</span>
+            </div>
+          </li>
+          <li class="tool-item" id="tool-item-python" data-tool="run_python">
+            <span class="tool-icon">🐍</span>
+            <div>
+              <span class="tool-name">Python Runner</span>
+              <span class="tool-desc">Sandboxed code execution</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <div class="sidebar-section" id="sidebar-api-section">
+        <p class="sidebar-label">API Key</p>
+        <div class="api-key-field" id="api-key-field">
+          <input
+            type="password"
+            id="api-key-input"
+            placeholder="{{ 'Key loaded from .env' if api_key_set else 'Enter Gemini API key…' }}"
+            autocomplete="off"
+            {% if api_key_set %}disabled{% endif %}
+          />
+          {% if not api_key_set %}
+          <a class="get-key-link" href="https://aistudio.google.com/app/apikey" target="_blank" id="get-key-link">Get key ↗</a>
+          {% endif %}
+        </div>
+        <div class="key-status" id="key-status">
+          {% if api_key_set %}
+          <span class="status-dot status-ok"></span> Key active from <code>.env</code>
+          {% else %}
+          <span class="status-dot status-warn"></span> Enter key to start
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="sidebar-section" id="sidebar-examples-section">
+        <p class="sidebar-label">Example Tasks</p>
+        <ul class="example-list" id="example-list" role="list">
+          <li class="example-item" id="example-1" tabindex="0">What is the latest news about artificial intelligence?</li>
+          <li class="example-item" id="example-2" tabindex="0">What is 15% of 847 and what is the square root of that result?</li>
+          <li class="example-item" id="example-3" tabindex="0">Who is Alan Turing and what did he contribute to computer science?</li>
+          <li class="example-item" id="example-4" tabindex="0">Write a Python function to find all prime numbers up to 100 and run it.</li>
+          <li class="example-item" id="example-5" tabindex="0">What time is it right now, and what day of the week is it?</li>
+        </ul>
+      </div>
+    </aside>
+
+    <!-- ─── MAIN AREA ─── -->
+    <main class="main-area" id="main-area">
+
+      <!-- Header -->
+      <header class="main-header" id="main-header">
+        <div class="header-title-group" id="header-title-group">
+          <h1 class="main-title" id="main-title">Agentic AI</h1>
+          <span class="main-badge" id="main-badge">Gemini 1.5 Flash</span>
+        </div>
+        <p class="main-subtitle" id="main-subtitle">
+          An autonomous agent that plans, searches, codes, and reasons through complex tasks — step by step.
+        </p>
+      </header>
+
+      <!-- Agent workspace -->
+      <div class="workspace" id="workspace">
+
+        <!-- Empty state -->
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon" id="empty-icon" aria-hidden="true">⬡</div>
+          <h2 class="empty-title" id="empty-title">Ready to work</h2>
+          <p class="empty-sub" id="empty-sub">Give me any task — research, math, coding, or a multi-step problem. I'll plan and solve it autonomously.</p>
+        </div>
+
+        <!-- Steps feed -->
+        <div class="steps-feed" id="steps-feed" aria-live="polite" aria-label="Agent execution steps"></div>
+
+      </div>
+
+      <!-- Stats bar (shown during/after run) -->
+      <div class="stats-bar" id="stats-bar" style="display:none">
+        <span class="stat" id="stat-steps"><span class="stat-val" id="stat-steps-val">0</span> steps</span>
+        <span class="stat" id="stat-tools"><span class="stat-val" id="stat-tools-val">0</span> tools used</span>
+        <span class="stat" id="stat-time"><span class="stat-val" id="stat-time-val">0s</span> elapsed</span>
+        <button class="clear-btn-sm" id="clear-run-btn">Clear</button>
+      </div>
+
+      <!-- Input area -->
+      <div class="input-area" id="input-area">
+        <div class="input-box" id="input-box">
+          <textarea
+            id="task-input"
+            name="task"
+            placeholder="Describe a task for the agent… (Shift+Enter for new line, Enter to send)"
+            rows="1"
+            spellcheck="true"
+            autocomplete="off"
+          ></textarea>
+          <button class="run-btn" id="run-btn" aria-label="Run agent" title="Run agent">
+            <span class="run-icon" id="run-icon">▶</span>
+          </button>
+        </div>
+        <p class="input-hint" id="input-hint">
+          The agent will autonomously plan and use tools to complete your task.
+        </p>
+      </div>
+
+    </main>
+  </div><!-- /layout -->
+
+  <script src="/static/scripts.js"></script>
+</body>
+</html>
